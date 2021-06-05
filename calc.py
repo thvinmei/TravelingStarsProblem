@@ -123,6 +123,22 @@ def local_search(visit_order, distance_matrix, improve_func):
 
     return visit_order
 
+def get_distance_m(lat1, lon1, lat2, lon2):
+    """
+    ２点間の距離(m)
+    球面三角法を利用した簡易的な距離計算
+    GoogleMapAPIのgeometory.computeDistanceBetweenのロジック
+    https://www.suzu6.net/posts/167-php-spherical-trigonometry/
+    """
+    R = 1.00  # 赤道半径
+    lat1 = math.radians(lat1)
+    lon1 = math.radians(lon1)
+    lat2 = math.radians(lat2)
+    lon2 = math.radians(lon2)
+    diff_lon = lon1 - lon2
+    dist = math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(diff_lon)
+    return R * math.acos(min(max(dist, -1.0), 1.0))
+
 
 if __name__ == "__main__":
     # 星図データを読み込み
@@ -146,9 +162,18 @@ if __name__ == "__main__":
     # 総移動距離の計算
     star_x = np.array(starcharts["RA"])
     star_y = np.array(starcharts["DE"])
-    distance_matrix = np.sqrt((star_x[:, np.newaxis] - star_x[np.newaxis, :]) ** 2 +
-                              (star_y[:, np.newaxis] - star_y[np.newaxis, :]) ** 2)
+    distance_matrix = np.zeros([len(star_x),len(star_x)])
+    for i in range(len(star_x)):
+        for j in range(len(star_y)):
+            sdis = get_distance_m(lat1 = star_y[j], lon1= star_x[j], lat2= star_y[i], lon2= star_x[i])
+            if sdis < 1e-5:
+                continue
+            else:
+                distance_matrix[i,j] = sdis
+
     print(np.round(distance_matrix))
+    sys,exit()
+   
 
     # 初期状態の星図を作成
     visualize_visit_order(starcharts)
