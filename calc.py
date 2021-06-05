@@ -11,7 +11,7 @@ rcParams['font.sans-serif'] = ['Hiragino Maru Gothic Pro', 'Yu Gothic', 'Meirio'
                                'Takao', 'IPAexGothic', 'IPAPGothic', 'VL PGothic', 'Noto Sans CJK JP']
 rcParams["font.size"] = 14
 startTime = time.time()
-NStart = 7200
+NStart = 10
 
 
 def calculate_total_distance(order, distance_matrix):
@@ -123,6 +123,7 @@ def local_search(visit_order, distance_matrix, improve_func):
 
     return visit_order
 
+
 def get_distance_m(lat1, lon1, lat2, lon2):
     """
     ２点間の距離(m)
@@ -136,7 +137,8 @@ def get_distance_m(lat1, lon1, lat2, lon2):
     lat2 = math.radians(lat2)
     lon2 = math.radians(lon2)
     diff_lon = lon1 - lon2
-    dist = math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * math.cos(lat2) * math.cos(diff_lon)
+    dist = math.sin(lat1) * math.sin(lat2) + math.cos(lat1) * \
+        math.cos(lat2) * math.cos(diff_lon)
     return R * math.acos(min(max(dist, -1.0), 1.0))
 
 
@@ -162,18 +164,17 @@ if __name__ == "__main__":
     # 総移動距離の計算
     star_x = np.array(starcharts["RA"])
     star_y = np.array(starcharts["DE"])
-    distance_matrix = np.zeros([len(star_x),len(star_x)])
+    distance_matrix = np.zeros([len(star_x), len(star_x)])
     for i in range(len(star_x)):
         for j in range(len(star_y)):
-            sdis = get_distance_m(lat1 = star_y[j], lon1= star_x[j], lat2= star_y[i], lon2= star_x[i])
+            sdis = get_distance_m(
+                lat1=star_y[j], lon1=star_x[j], lat2=star_y[i], lon2=star_x[i])
             if sdis < 1e-5:
                 continue
             else:
-                distance_matrix[i,j] = sdis
+                distance_matrix[i, j] = sdis
 
     print(np.round(distance_matrix))
-    sys,exit()
-   
 
     # 初期状態の星図を作成
     visualize_visit_order(starcharts)
